@@ -1,0 +1,176 @@
+Mido Debian 13 migration execution record
+==========================================
+
+Changed branch/field
+--------------------
+TARGET=mido
+DISTRO: debian-bookworm -> debian-trixie
+KERNEL: legacy KlipperPhones kernel -> 7.1.3-msm8953
+DTB=qcom/msm8953-xiaomi-mido.dtb
+HOSTNAME: debuerreotype -> mido-debian
+USB_DEVICE_ADDRESS=172.16.42.1/24 (also retains 192.168.7.1/30)
+SSH_HOSTKEYS=first-boot
+DEVICE_RESULT=Debian 13 booted; USB ECM+ACM active; SSH active
+
+Canonical artifacts
+-------------------
+MODIFIED_FILE: /home/prentice/Develop/note4x-linux/mido-migration-modified.sh
+DIFF_FILE: /home/prentice/Develop/note4x-linux/mido-migration.patch
+VERIFICATION: /home/prentice/Develop/note4x-linux/VERIFICATION.txt
+ROLLBACK: /home/prentice/Develop/note4x-linux/ROLLBACK.sh
+
+BASELINE
+--------
+Exact command: ./mido-migration-original.sh --plan
+Input: --plan
+Literal output:
+TARGET=mido
+DISTRO=debian-bookworm
+KERNEL_REPO=https://github.com/msm8953-mainline/linux.git
+KERNEL_BRANCH=master
+DTB=qcom/msm8953-xiaomi-mido.dtb
+BASELINE_EXIT=0
+Exit status: 0
+
+MODIFIED
+--------
+Exact command: ./mido-migration-modified.sh --plan
+Concrete test input: --plan
+Literal output:
+TARGET=mido
+DISTRO=debian-trixie
+KERNEL_REPO=https://github.com/msm8953-mainline/linux.git
+KERNEL_BRANCH=master
+DTB=qcom/msm8953-xiaomi-mido.dtb
+HOSTNAME=mido-debian
+USB_DEVICE_ADDRESS=172.16.42.1/24
+SSH_HOSTKEYS=first-boot
+MODIFIED_EXIT=0
+Exit status: 0
+
+ROLLBACK (tested on another copy)
+---------------------------------
+Actual rollback invocation: ./ROLLBACK.sh rollback-test-final.sh mido-migration-original.sh
+Rollback input: rollback-test-final.sh, copied from mido-migration-modified.sh
+Rollback literal output:
+54540ba5693f84b41c4c250b1246ef734e826fcf8f476c0a21b0b61be10225fb  rollback-test-final.sh
+ROLLBACK_INVOKE_EXIT=0
+Rollback exit status: 0
+
+Exact post-rollback command: bash rollback-test-final.sh --plan
+Input: --plan
+Literal output:
+TARGET=mido
+DISTRO=debian-bookworm
+KERNEL_REPO=https://github.com/msm8953-mainline/linux.git
+KERNEL_BRANCH=master
+DTB=qcom/msm8953-xiaomi-mido.dtb
+ROLLBACK_POST_EXIT=0
+RESTORED_HASH=54540ba5693f84b41c4c250b1246ef734e826fcf8f476c0a21b0b61be10225fb  rollback-test-final.sh
+MODIFIED_REMAINS_HASH=e8697998acbbf646179f413307baca50e879b4bded0093062b2287f108cec291  mido-migration-modified.sh
+RESTORED_BYTE_COMPARE_EXIT=0
+Exit status: 0
+Restored hash: 54540ba5693f84b41c4c250b1246ef734e826fcf8f476c0a21b0b61be10225fb
+Restored behavior/status: rollback-test-final.sh exactly matches the baseline and exits 0; MODIFIED_FILE remains changed.
+
+FASTBOOT PREFLIGHT AND BACKUP
+-----------------------------
+Read result: product=lk2nd-msm8953; unlocked=yes; secure=yes
+Boot partition size: 0x3f80000
+Userdata partition size: 0x5ffb79e00
+Original boot backup: /home/prentice/Develop/note4x-linux/mido-original-boot.img
+Original boot hash: 62a1898d2f014bbf1642546f142165cf137a1db4f4df3ffeecd7193a57ece79d
+Userdata readback was stopped after 15,728,640 bytes because the full read was impractically slow; retained as mido-original-userdata.img.partial.
+
+LK2ND WRITE
+-----------
+Exact command: fastboot flash lk2nd mido-lk2nd-official-modified.img
+Input: f5d8bbbca0c9113441faba3430a3550c3a09996b9d877a07f759a1445ac42fb1  mido-lk2nd-official-modified.img
+Literal result: Sending 'lk2nd' OKAY; Writing 'lk2nd' OKAY
+Exit status: 0
+Post-write product: lk2nd-msm8953
+
+ROOTFS WRITE
+------------
+Exact command: fastboot flash userdata debian-trixie-arm64-mido-rootfs-modified.sparse.img
+Input at flash time: dcf98e2487de923c2c818a1396e300eccbf12762f12702adbe0553dc83c4debf  debian-trixie-arm64-mido-rootfs-modified.sparse.img
+Literal output:
+Warning: skip copying userdata image avb footer due to sparse image.
+Sending sparse 'userdata' 1/2 (521463 KB)          OKAY [ 13.629s]
+Writing 'userdata'                                 OKAY [357.728s]
+Sending sparse 'userdata' 2/2 (204632 KB)          OKAY [  5.290s]
+Writing 'userdata'                                 OKAY [113.013s]
+Finished. Total time: 489.981s
+FLASH_USERDATA_EXIT=0
+Exit status: 0
+
+BOOT WRITE AND READBACK
+-----------------------
+Exact command: fastboot flash boot mido-debian-7.1.3-modified-boot.img
+Input: 3aa60050095cc96f675bc138983b497db3484112888eaadf01437d45fe0eab45  mido-debian-7.1.3-modified-boot.img
+Literal output:
+Sending 'boot' (28072 KB)                          OKAY [  0.760s]
+Writing 'boot'                                     OKAY [  0.377s]
+Finished. Total time: 1.241s
+FLASH_BOOT_EXIT=0
+Exit status: 0
+Exact readback command: fastboot fetch boot mido-modified-boot-partition-verified.img
+Readback literal result: Fetching boot (offset=0, size=3f80000) OKAY; FETCH_BOOT_EXIT=0
+Exact comparison input: first 28,745,728 bytes of fetched virtual boot partition
+Literal output:
+SOURCE_BOOT_HASH=3aa60050095cc96f675bc138983b497db3484112888eaadf01437d45fe0eab45
+FETCHED_AT_ZERO_HASH=3aa60050095cc96f675bc138983b497db3484112888eaadf01437d45fe0eab45
+BOOT_BYTE_COMPARE_EXIT=0
+Exit status: 0
+
+FIRST-BOOT REPAIR AND PERSISTENCE
+---------------------------------
+Baseline command: /usr/sbin/sshd -t
+Input: first Debian boot over ttyGS0
+Literal output: sshd: no hostkeys available -- exiting.
+Exit status: 1
+Modified action: generated unique SSH host keys, installed mido-ssh-hostkeys.service and ssh.service dependency, added 172.16.42.1/24, set hostname mido-debian, restarted networkd last.
+Literal result:
+PERSISTENT_FIX_OK
+mido-debian
+active
+active
+active
+Exit status: 0
+Restored host-side temporary state: ttyACM0 mode restored to 660 root:dialout; temporary 192.168.7.2/30 host address removed; original 172.16.42.2/24 host profile retained.
+
+REBOOTED LIVE DEVICE TEST
+-------------------------
+Exact command: SSH over USB ECM to root@172.16.42.1 with the verification command shown in live-final-verification.log
+Input: USB host 172.16.42.2/24 -> device 172.16.42.1/24 after a full reboot
+Literal output:
+LIVE_VERIFY_START
+mido-debian
+Linux mido-debian 7.1.3-msm8953 #1-postmarketos-qcom-msm8953 SMP PREEMPT Fri Jul 24 22:27:29 UTC aarch64 GNU/Linux
+PRETTY_NAME=Debian GNU/Linux 13 (trixie)
+VERSION_ID=13
+MODEL=Xiaomi Redmi Note 4X
+running
+active
+active
+active
+active
+active
+usb0             UP             192.168.7.1/30 172.16.42.1/24
+/dev/mmcblk0p49 mido-root ext4 rw,noatime
+up 0 minutes
+LIVE_VERIFY_END
+LIVE_VERIFY_EXIT=0
+Exit status: 0
+Restored behavior/status: after reboot the phone re-enumerated as USB ECM+ACM, ping succeeded, SSH succeeded, systemd reported running, and all required services reported active.
+
+REPRODUCIBLE RELEASE IMAGE
+--------------------------
+The local rootfs release copy now includes the first-boot SSH generator, hostname, hosts file, and both USB addresses.
+Raw image hash: 9727f477daf1d184a202e9ea4fabb4e18b500f51a8151c929ac75d2e8ce30d4d
+Current sparse image hash: cd88d5fe3feaf1c93780732c63f2c92a1ec9af6de3d9ddd93f0439377a9f5725
+Preserved pre-fix sparse hash: dcf98e2487de923c2c818a1396e300eccbf12762f12702adbe0553dc83c4debf
+Exact validation commands: img2simg raw staged; simg2img staged roundtrip; e2fsck -fn roundtrip; sha256sum -c mido-release-sha256.txt
+Concrete validation input: debian-trixie-arm64-mido-rootfs-modified.img and current sparse release image
+Literal result: IMG2SIMG_EXIT=0; SIMG2IMG_EXIT=0; SPARSE_E2FSCK_EXIT=0; all four manifest entries OK
+Exit status: 0

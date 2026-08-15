@@ -1,0 +1,27 @@
+--- mido-migration-original.sh	2026-08-15 09:22:49.013770114 +0800
++++ mido-migration-modified.sh	2026-08-15 17:04:22.494951683 +0800
+@@ -1,10 +1,13 @@
+ #!/usr/bin/env bash
+ set -euo pipefail
+ 
+-DISTRO="debian-bookworm"
++DISTRO="debian-trixie"
+ KERNEL_REPO="https://github.com/msm8953-mainline/linux.git"
+ KERNEL_BRANCH="master"
+ DTB="qcom/msm8953-xiaomi-mido.dtb"
++HOSTNAME="mido-debian"
++USB_DEVICE_ADDRESS="172.16.42.1/24"
++SSH_HOSTKEYS="first-boot"
+ 
+ case "${1:---plan}" in
+   --plan)
+@@ -13,6 +16,9 @@
+     echo "KERNEL_REPO=${KERNEL_REPO}"
+     echo "KERNEL_BRANCH=${KERNEL_BRANCH}"
+     echo "DTB=${DTB}"
++    echo "HOSTNAME=${HOSTNAME}"
++    echo "USB_DEVICE_ADDRESS=${USB_DEVICE_ADDRESS}"
++    echo "SSH_HOSTKEYS=${SSH_HOSTKEYS}"
+     ;;
+   --preflight)
+     command -v fastboot >/dev/null

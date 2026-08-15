@@ -1,0 +1,15 @@
+*.img
+*.img.*
+*.apk
+*.tar
+*.partial
+*.log
+*.previous.*
+.mido-known-hosts*
+.fetched-*
+.sparse-roundtrip-verified.img
+.mnt-mido-rootfs/
+offline-preflight-config/
+rollback-test*.sh
+rollback-output.txt
+rollback-sha.txt
