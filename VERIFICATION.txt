@@ -174,3 +174,41 @@ Exact validation commands: img2simg raw staged; simg2img staged roundtrip; e2fsc
 Concrete validation input: debian-trixie-arm64-mido-rootfs-modified.img and current sparse release image
 Literal result: IMG2SIMG_EXIT=0; SIMG2IMG_EXIT=0; SPARSE_E2FSCK_EXIT=0; all four manifest entries OK
 Exit status: 0
+
+DIRECT RELEASE DOWNLOAD AND STOCK-FASTBOOT FLASH
+------------------------------------------------
+Changed branch/field: STOCK_FASTBOOT_PATH=combined lk2nd+OS boot; TARGET_FILTER=mido|lk2nd-msm8953; EXCLUDED_PRODUCT=kona
+Download command input: public Release v2026.08.15, five required flashing assets
+Download literal result: DOWNLOAD_DONE; all three original image hashes OK
+Download exit status: 0
+Selected target input: connected Fastboot devices queried individually with getvar product
+Selected target literal result: SELECTED_TARGET_PRODUCT=mido; unrelated OnePlus 8T product kona was not selected or written
+Original boot backup retained hash: 62a1898d2f014bbf1642546f142165cf137a1db4f4df3ffeecd7193a57ece79d
+Exact userdata write: fastboot -s <selected-mido> flash userdata release-v2026.08.15-download/debian-trixie-arm64-mido-rootfs-modified.sparse.img
+Concrete userdata input hash: cd88d5fe3feaf1c93780732c63f2c92a1ec9af6de3d9ddd93f0439377a9f5725
+Literal result: sparse 1/2 write OKAY; sparse 2/2 write OKAY; Finished. Total time: 486.851s
+Exit status: 0
+Combined boot construction input: official lk2nd at offset 0; Debian OS boot at offset 524288; partition size 66584576 bytes
+Combined boot hash: f5254ff391e2a352d99bb95679d8d6ffdc805a18fd8122beb7b8e61c6bf161d3
+Embedded lk2nd comparison: 0
+Embedded OS boot comparison: 0
+Exact boot write: fastboot -s <selected-mido> flash boot release-v2026.08.15-download/mido-debian-7.1.3-stock-fastboot-combined-boot.img
+Literal result: Sending boot OKAY; Writing boot OKAY; Finished. Total time: 2.575s
+Exit status: 0
+Exact reboot result: Rebooting OKAY; STOCK_REBOOT_EXIT=0
+Post-reboot input: USB ECM 172.16.42.2 -> 172.16.42.1 and SSH verification
+Literal output:
+MODEL=Xiaomi Redmi Note 4X
+mido-debian
+Linux mido-debian 7.1.3-msm8953 aarch64 GNU/Linux
+OS=Debian GNU/Linux 13 (trixie) 13
+running
+active
+active
+active
+active
+active
+usb0 UP 192.168.7.1/30 172.16.42.1/24
+/dev/mmcblk0p49 mido-root ext4 rw,noatime
+RELEASE_DIRECT_FLASH_LIVE_EXIT=0
+Restored behavior/status: Redmi Note 4X boots the downloaded release and is reachable over USB SSH; unrelated phone state was unchanged.

@@ -4,6 +4,7 @@ set -euo pipefail
 LK2ND="mido-lk2nd-official-modified.img"
 BOOT="mido-debian-7.1.3-modified-boot.img"
 ROOTFS="debian-trixie-arm64-mido-rootfs-modified.sparse.img"
+COMBINED_BOOT="mido-debian-7.1.3-stock-fastboot-combined-boot.img"
 MANIFEST="mido-flash-sha256.txt"
 
 usage() {
@@ -14,7 +15,7 @@ usage() {
 check_files() {
   command -v fastboot >/dev/null
   command -v sha256sum >/dev/null
-  for file in "$LK2ND" "$BOOT" "$ROOTFS" "$MANIFEST"; do
+  for file in "$LK2ND" "$BOOT" "$ROOTFS" "$COMBINED_BOOT" "$MANIFEST"; do
     [[ -f "$file" ]] || { echo "missing: $file" >&2; exit 1; }
   done
   sha256sum -c "$MANIFEST"
@@ -41,38 +42,24 @@ find_target() {
   printf '%s\n' "${targets[0]}"
 }
 
-wait_for_lk2nd() {
-  local i target
-  for ((i=0; i<60; i++)); do
-    target="$(find_target 2>/dev/null || true)"
-    if [[ "${target#*:}" == "lk2nd-msm8953" ]]; then
-      printf '%s\n' "$target"
-      return 0
-    fi
-    sleep 1
-  done
-  echo "lk2nd target did not appear" >&2
-  return 1
-}
-
 flash_target() {
   local target serial product unlocked
   target="$(find_target)"
   serial="${target%%:*}"
   product="${target#*:}"
-  unlocked="$(fastboot -s "$serial" getvar unlocked 2>&1 | awk -F': ' '/^unlocked:/{print $2; exit}')"
-  [[ "$unlocked" == "yes" || "$unlocked" == "true" ]] || {
-    echo "target is not unlocked" >&2
-    exit 1
-  }
-
   if [[ "$product" == "mido" ]]; then
-    fastboot -s "$serial" boot "$LK2ND"
-    target="$(wait_for_lk2nd)"
-    serial="${target%%:*}"
+    fastboot -s "$serial" flash userdata "$ROOTFS"
+    fastboot -s "$serial" flash boot "$COMBINED_BOOT"
+    fastboot -s "$serial" reboot
+    echo "FLASH_COMPLETE"
+    return 0
   fi
 
-  [[ "$(product_of "$serial")" == "lk2nd-msm8953" ]]
+  unlocked="$(fastboot -s "$serial" getvar unlocked 2>&1 | awk -F': ' '/^unlocked:/{print $2; exit}')"
+  [[ "$unlocked" == "yes" || "$unlocked" == "true" ]] || {
+    echo "lk2nd target is not unlocked" >&2
+    exit 1
+  }
   fastboot -s "$serial" flash lk2nd "$LK2ND"
   fastboot -s "$serial" flash userdata "$ROOTFS"
   fastboot -s "$serial" flash boot "$BOOT"
