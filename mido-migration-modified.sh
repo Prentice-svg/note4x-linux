@@ -8,6 +8,7 @@ DTB="qcom/msm8953-xiaomi-mido.dtb"
 HOSTNAME="mido-debian"
 USB_DEVICE_ADDRESS="172.16.42.1/24"
 SSH_HOSTKEYS="first-boot"
+POWER_POLICY="never-suspend"
 
 case "${1:---plan}" in
   --plan)
@@ -19,6 +20,7 @@ case "${1:---plan}" in
     echo "HOSTNAME=${HOSTNAME}"
     echo "USB_DEVICE_ADDRESS=${USB_DEVICE_ADDRESS}"
     echo "SSH_HOSTKEYS=${SSH_HOSTKEYS}"
+    echo "POWER_POLICY=${POWER_POLICY}"
     ;;
   --preflight)
     command -v fastboot >/dev/null

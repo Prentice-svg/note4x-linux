@@ -212,3 +212,51 @@ usb0 UP 192.168.7.1/30 172.16.42.1/24
 /dev/mmcblk0p49 mido-root ext4 rw,noatime
 RELEASE_DIRECT_FLASH_LIVE_EXIT=0
 Restored behavior/status: Redmi Note 4X boots the downloaded release and is reachable over USB SSH; unrelated phone state was unchanged.
+
+NEVER-SUSPEND DIRECT-POWER POLICY
+---------------------------------
+Changed branch/field: POWER_POLICY=never-suspend
+Baseline input: Debian 13 rootfs before power-policy change
+Baseline literal result: sleep.target, suspend.target, hibernate.target, hybrid-sleep.target and suspend-then-hibernate.target were unmasked
+Baseline status: policy absent
+Modified input: logind ignore policy, systemd sleep Allow*=no policy, five sleep targets and four systemd sleep services masked to /dev/null
+Modified raw rootfs hash: ba40c5e1e4cdeb3298c0103c46c620d08f82178111db78cd223ef83e97286ef3
+Modified sparse rootfs hash: 8f29bc51af9aae8310dd74fc90272078169c12061bb24c603b453036970fd293
+Preserved pre-change sparse hash: cd88d5fe3feaf1c93780732c63f2c92a1ec9af6de3d9ddd93f0439377a9f5725
+Roundtrip validation input: never-suspend sparse image converted back to raw ext4
+Literal result: SIMG2IMG_EXIT=0; ROUNDTRIP_E2FSCK_EXIT=0; all nine target/service links resolved to /dev/null
+Exit status: 0
+Device selection input: all connected Fastboot devices queried with getvar product
+Literal result: exactly one selected product=mido
+Exact device write: fastboot -s <selected-mido> flash userdata debian-trixie-arm64-mido-rootfs-modified.sparse.img
+Concrete device input hash: 8f29bc51af9aae8310dd74fc90272078169c12061bb24c603b453036970fd293
+Literal result: sparse 1/2 OKAY; sparse 2/2 OKAY; Finished. Total time: 486.358s
+Exit status: 0
+Exact reboot result: Rebooting OKAY; NEVER_SLEEP_REBOOT_EXIT=0
+Live modified test input: systemctl policy reads followed by systemctl start suspend.target
+Literal output:
+sleep.target=masked
+suspend.target=masked
+hibernate.target=masked
+hybrid-sleep.target=masked
+suspend-then-hibernate.target=masked
+systemd-suspend.service=masked
+systemd-hibernate.service=masked
+systemd-hybrid-sleep.service=masked
+systemd-suspend-then-hibernate.service=masked
+IdleAction=ignore
+AllowSuspend=no
+AllowHibernation=no
+AllowHybridSleep=no
+AllowSuspendThenHibernate=no
+Failed to start suspend.target: Unit suspend.target is masked.
+SUSPEND_START_EXIT=1
+running
+active
+active
+active
+NEVER_SLEEP_SSH_EXIT=0
+Post-attempt input: three USB-network pings
+Literal result: 3 packets transmitted, 3 received, 0% packet loss
+Exit status: 0
+Restored behavior/status: suspend request was rejected, the device stayed running, and SSH/USB/networkd stayed active; MODIFIED_FILE remains POWER_POLICY=never-suspend.

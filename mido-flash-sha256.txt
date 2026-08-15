@@ -1,4 +1,4 @@
 f5d8bbbca0c9113441faba3430a3550c3a09996b9d877a07f759a1445ac42fb1  mido-lk2nd-official-modified.img
 3aa60050095cc96f675bc138983b497db3484112888eaadf01437d45fe0eab45  mido-debian-7.1.3-modified-boot.img
-cd88d5fe3feaf1c93780732c63f2c92a1ec9af6de3d9ddd93f0439377a9f5725  debian-trixie-arm64-mido-rootfs-modified.sparse.img
+8f29bc51af9aae8310dd74fc90272078169c12061bb24c603b453036970fd293  debian-trixie-arm64-mido-rootfs-modified.sparse.img
 f5254ff391e2a352d99bb95679d8d6ffdc805a18fd8122beb7b8e61c6bf161d3  mido-debian-7.1.3-stock-fastboot-combined-boot.img

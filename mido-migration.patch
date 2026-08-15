@@ -1,6 +1,6 @@
 --- mido-migration-original.sh	2026-08-15 09:22:49.013770114 +0800
-+++ mido-migration-modified.sh	2026-08-15 17:04:22.494951683 +0800
-@@ -1,10 +1,13 @@
++++ mido-migration-modified.sh	2026-08-15 18:03:48.027741536 +0800
+@@ -1,10 +1,14 @@
  #!/usr/bin/env bash
  set -euo pipefail
  
@@ -12,16 +12,18 @@
 +HOSTNAME="mido-debian"
 +USB_DEVICE_ADDRESS="172.16.42.1/24"
 +SSH_HOSTKEYS="first-boot"
++POWER_POLICY="never-suspend"
  
  case "${1:---plan}" in
    --plan)
-@@ -13,6 +16,9 @@
+@@ -13,6 +17,10 @@
      echo "KERNEL_REPO=${KERNEL_REPO}"
      echo "KERNEL_BRANCH=${KERNEL_BRANCH}"
      echo "DTB=${DTB}"
 +    echo "HOSTNAME=${HOSTNAME}"
 +    echo "USB_DEVICE_ADDRESS=${USB_DEVICE_ADDRESS}"
 +    echo "SSH_HOSTKEYS=${SSH_HOSTKEYS}"
++    echo "POWER_POLICY=${POWER_POLICY}"
      ;;
    --preflight)
      command -v fastboot >/dev/null
