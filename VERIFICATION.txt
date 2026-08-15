@@ -260,3 +260,36 @@ Post-attempt input: three USB-network pings
 Literal result: 3 packets transmitted, 3 received, 0% packet loss
 Exit status: 0
 Restored behavior/status: suspend request was rejected, the device stayed running, and SSH/USB/networkd stayed active; MODIFIED_FILE remains POWER_POLICY=never-suspend.
+
+STABILITY SOAK TEST
+-------------------
+Changed branch/field under test: POWER_POLICY=never-suspend on direct USB power
+Baseline command/input: live device preflight with uptime, memory, root filesystem, power supplies, thermal zones, system state and failed units
+Baseline literal result: system running; 2,935,414,784 bytes RAM; root filesystem 14% used; USB power online=1; initial maximum CPU temperature 44,100 millicelsius; failed units=0
+Baseline exit status: 0
+Modified/load command input: 805,306,368-byte RAM file, 536,870,912-byte eMMC file, eight concurrent SHA-256 workers for 120 seconds, 600 USB-network pings, and 30 independent SSH reconnects
+Literal result:
+REMOTE_SOAK_EXIT=0 PING_SOAK_EXIT=0 SSH_LOOP_EXIT=0
+RAM_COMPARE=OK
+DISK_COMPARE=OK
+CPU_WORKERS=8 CPU_SECONDS=120 THERMAL_SAMPLES=41 MAX_TEMP_MILLIC=90600
+DMESG_ERROR_LINES_BEFORE=14
+DMESG_ERROR_LINES_AFTER=14 DMESG_ERROR_DELTA=0
+SYSTEM_STATE=running SSH=active USB=active NETWORKD=active
+FAILED_UNITS=0
+600 packets transmitted, 600 received, 0% packet loss
+rtt min/avg/max/mdev = 0.233/0.579/22.595/1.913 ms
+SSH_RECONNECT_OK=30 SSH_RECONNECT_FAIL=0
+Modified/load exit status: 0
+Exact post-load input: 60-second cooldown followed by thermal, CPU governor, cooling-device, power, temporary-file and service checks
+Literal result:
+COOLDOWN_MAX_TEMP_MILLIC=51600
+policy0 governor=schedutil cur=1420800 max=2016000
+cooling_device0 state=0
+cooling_device1 state=0
+qcom-smbchg-usb online=1 status=Full
+TEMP_FILES_CLEAN=OK
+REMOTE_SCRIPT_REMOVED=OK
+SYSTEM=running SSH=active USB=active FAILED=0
+POST_SOAK_EXIT=0
+Restored behavior/status: all temporary RAM/eMMC files and the remote soak script were removed; root filesystem usage returned to 14%; system, SSH and USB remained active; no new kernel error lines occurred.
